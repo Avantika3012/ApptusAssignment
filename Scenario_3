@@ -1,0 +1,29 @@
+Q3 - SCENARIO
+A Toy Retail company ToyTrex has it retail application deployed as 3-tier application - Web App(UI), Web API(middle layer) and Database as Azure SQL.
+The user load started increasing multiple fold every month and complex programs getting implemented, the application started performing poorly.
+As a result, company decided to re-architect the middle layer as microservices using Azure Kubernetes Services.
+The new architecture has below design decisions.
+
+1) The middle layer should be implemented as Microservices using Azure AKS
+2) The middle layer API should be deployed as containerized application images
+3) The container images will use Azure Container Repository (ACR) as the private image repository
+4) The CI/CD pipelines for microservices should be implemented using Azure DevOps services.
+5) The Azure DevOps should be able to access ACR and download the container images for microservices deployment
+6) The image should be deployed as templates such as <image_name>:<build_id>
+
+Explain the DevOps configuration and steps in detail for above requirements
+Solution:
+Create Kubernetes cluster in AKS to host app
+Grant access to ACR from AKS. Service principal will be used by AKS to access ACR. Then it can use container images from ACR.
+Using CI/CD pipeline: Build pipeline will build docker image and will store in ACR. The image will be pushed to ACR. Service connection will be used to access ACR from Azure DevOps. Under “Docker Registry Service Connection” , the subscription and container registry will be selected to create a service connection.
+Release pipeline will deploy kubernetes cluster in Azure from Azure DevOps. We will need a service connection to access AKS.
+steps:
+- task: Docker@2
+  displayName: Build an image
+   inputs:
+    repository: $(imageName)
+    command: build
+    Dockerfile: $(dockerFilePath)
+ containerRegistry: $(ACRRegistryServiceConnection)
+          tags: |
+          $(build.BuildNumber)
