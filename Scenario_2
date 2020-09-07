@@ -1,0 +1,247 @@
+Q2 - SCENARIO
+Macro Life, a healthcare company has recently setup the entire Network and Infrastructure on Azure. 
+The infrastructure has different components such as Virtual N/W, Subnets, NIC, IPs, NSG etc.
+The IT team currently has developed PowerShell scripts to deploy each component where all the properties of each resource is set using PowerShell commands.
+The business has realized that the PowerShell scripts are growing over period of time and difficult to handover when new admin onboards in the IT.
+The IT team has now decided to move to ARM based deployment of all resources to Azure.
+All the passwords are stored in a Azure Service known as key Vault. The deployments needs to be automated using Azure DevOps using IaC(Infrastructure as Code).
+
+1) What are different artifacts you need to create - name of the artifacts and its purpose
+Solution: 3 different types of artifacts we need to create:
+Build artifacts: These are used to test or deploy the app
+pipeline artifacts: These are used to store build output and also move files between jobs in pipeline
+
+2) List the tools you will to create and store the ARM templates.
+Solution: 
+the following tools can be used to store ARM templates:
+Azure Repos
+Git 
+Azure Storage account
+3) Explain the process and steps to create automated deployment pipeline. 
+ Solution:
+To create automated deployment pipeline, PFB steps required to achieve it.
+Create organization in Azure DevOps
+Create Project
+Go to pipelines. Choose to create a new pipeline
+Select the repository where the code reside like Azure Repos. 
+Create a starter pipeline
+Add ARM deployment task to deploy a resource group. Use the task name as AzureResourceGroupDeployment@2
+
+4) Create a sample ARM template you will use to deploy a Windows VM of any size
+Solution:
+
+{
+
+
+
+
+ "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+
+
+ "contentVersion": "1.0.0.0",
+
+
+ "parameters": {
+
+
+   "adminUsername": {
+
+
+     "type": "string",
+
+
+     "metadata": {
+
+
+       "description": "User name for the Virtual Machine."
+
+
+     }
+
+
+   },
+
+
+   "adminPassword": {
+
+
+     "type": "securestring",
+
+
+     "metadata": {
+
+
+       "description": "Password for the Virtual Machine."
+
+
+     }
+
+
+   },
+
+{
+
+
+
+
+ "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+
+
+ "contentVersion": "1.0.0.0",
+
+
+ "parameters": {
+
+
+   "adminUsername": {
+
+
+     "type": "string",
+
+
+     "metadata": {
+
+
+       "description": "User name for the Virtual Machine."
+
+
+     }
+
+
+   },
+
+
+   "adminPassword": {
+
+
+     "type": "securestring",
+
+
+     "metadata": {
+
+
+       "description": "Password for the Virtual Machine."
+
+
+     }
+
+
+   },
+
+
+         "adminPassword": "[parameters('adminPassword')]"
+
+
+       },
+
+
+       "storageProfile": {
+
+
+         "imageReference": {
+
+
+           "publisher": "[variables('imagePublisher')]",
+
+
+           "offer": "[variables('imageOffer')]",
+
+
+           "sku": "[parameters('windowsOSVersion')]",
+
+
+           "version": "latest"
+
+
+         },
+
+
+         "osDisk": {
+
+
+           "createOption": "FromImage"
+
+
+         },
+
+
+         "dataDisks": [
+
+
+           {
+
+
+             "diskSizeGB":“[parameters('windowsOSVersion')]”,
+
+
+             "lun": 0,
+
+
+             "createOption": "Empty"
+
+
+           }
+
+
+         ]
+
+
+       },
+
+5) Explain how will you access the password stored in Key Vault and use it as Admin Password in the VM ARM template.
+Solution: We need to enable property in key vault “enabledForTemplateDeployment”. This property needs to be set to true.
+
+{
+
+
+
+
+ "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+
+
+ "contentVersion": "1.0.0.0",
+
+
+ "parameters": {
+
+
+   "adminUsername": {
+
+
+     "value": "Avantika"
+
+
+   },
+
+
+   "adminPassword": {
+
+
+     "reference": {
+
+
+       "keyVault": {
+
+
+         "id": "Keyvault_Avantika"
+
+
+       },
+
+
+       "secretName": "Password_for_Admin"
+
+
+     }
+
+
+   }
+
+
+ }
+
+
+}
+
+Above code can be specified in parameters section and this parameter can be called in VM creation while setting username and password.
+
